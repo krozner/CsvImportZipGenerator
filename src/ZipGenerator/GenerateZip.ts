@@ -9,7 +9,7 @@ export const GenerateZip = async (filePath: string) => {
     let zip: Zip;
 
     try {
-        const splitter = new CsvFileSplitter(filePath, { lineLimit: 500 });
+        const splitter = new CsvFileSplitter(filePath, { lineLimit: 200 });
         await splitter.split();
 
         for (const file of splitter) {
@@ -28,7 +28,8 @@ export const GenerateZip = async (filePath: string) => {
             console.log(`\nSaving zip file...`);
 
             await doc.save(zip); // moves document to zip folder
-            await zip.save(String(file.index)); // archive folder
+            await zip.save(); // archive folder
+            await zip.moveTo(`/var/www/app/var/zip`, String(file.index)); // archive folder
 
             console.log(`Zip file created, index: ${file.index}`);
         }

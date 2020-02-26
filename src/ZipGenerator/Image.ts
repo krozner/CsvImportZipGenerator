@@ -36,7 +36,7 @@ export class Image {
     async download(): Promise<void> {
         const { url, filePath } = this;
 
-        return new Promise(resolve => {
+        await new Promise(resolve => {
             request.head(url, function(err, res, body) {
                 request(url)
                     .pipe(createWriteStream(filePath))
@@ -61,7 +61,7 @@ export class Image {
     }
 
     async copyTo(srcDir: string, destDir: string, fileName: string): Promise<void> {
-        return new Promise(resolve => {
+        await new Promise(resolve => {
             this.setFilePath(destDir, fileName);
 
             copyFile(`${srcDir}/${fileName}`, this.filePath, err => {
@@ -74,7 +74,7 @@ export class Image {
     }
 
     async moveTo(destDir: string, fileName: string): Promise<void> {
-        return new Promise(resolve => {
+        await new Promise(resolve => {
             rename(this.filePath, `${destDir}/${fileName}`, err => {
                 this.setFilePath(destDir, fileName);
 

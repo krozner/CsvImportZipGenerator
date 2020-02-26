@@ -1,25 +1,27 @@
 import * as uuidV4 from "uuid/v4";
-import { mkdir, rmdirSync, createWriteStream, existsSync } from "fs";
+import { mkdir, createWriteStream, existsSync, copyFile } from "fs";
 import * as archiver from "archiver";
 import { Images } from "./Images";
 
 export class Zip extends Array<Images> {
-    private readonly name: string;
+    private readonly dirName: string;
+    private readonly filePath: string;
 
-    readonly path: string;
+    readonly dirPath: string;
     readonly imgDirPath: string;
 
     constructor() {
         super();
 
-        this.name = uuidV4();
-        this.path = `/tmp/${this.name}`;
-        this.imgDirPath = `${this.path}/Images`;
+        this.dirName = uuidV4();
+        this.dirPath = `/tmp/${this.dirName}`;
+        this.imgDirPath = `${this.dirPath}/Images`;
+        this.filePath = `${this.dirPath}.zip`
     }
 
-    private mkdir(dir: string): Promise<void> {
-        return new Promise(resolve => {
-            mkdir(dir, { recursive: true }, () => {
+    private async mkdir(dir: string): Promise<void> {
+        await new Promise(resolve => {
+            mkdir(dir, {recursive: true}, () => {
                 resolve();
             });
         });
@@ -45,9 +47,9 @@ export class Zip extends Array<Images> {
         }
     }
 
-    async save(name: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const output = createWriteStream(`/tmp/${name}.zip`);
+    async save(): Promise<void> {
+        await new Promise((resolve, reject) => {
+            const output = createWriteStream(this.filePath);
             output.on("close", () => {
                 resolve();
             });
@@ -55,12 +57,22 @@ export class Zip extends Array<Images> {
             const zipArchive = archiver("zip");
 
             zipArchive.pipe(output);
-            zipArchive.directory(this.path, false);
+            zipArchive.directory(this.dirPath, false);
             zipArchive.finalize(err => {
                 if (err) {
                     reject(err);
                 }
-                rmdirSync(this.path);
+            });
+        });
+    }
+
+    async moveTo(dirPath: string, name: string): Promise<void> {
+        await new Promise(resolve => {
+            copyFile(this.filePath, `${dirPath}/${name}.zip`, err => {
+                if (err) {
+                    console.log(err);
+                }
+                resolve();
             });
         });
     }

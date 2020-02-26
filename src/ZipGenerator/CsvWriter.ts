@@ -52,9 +52,9 @@ export class CsvWriter extends Document<any> {
 
     save(zip?: Zip);
 
-    async save({ path }: Zip) {
+    async save({ dirPath }: Zip) {
         await super.save();
 
-        renameSync(this.filePath, `${path}/Product.csv`);
+        renameSync(this.filePath, `${dirPath}/Product.csv`);
     }
 }
