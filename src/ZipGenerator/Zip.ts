@@ -67,6 +67,8 @@ export class Zip extends Array<Images> {
     }
 
     async moveTo(dirPath: string, name: string): Promise<void> {
+        await this.mkdir(dirPath);
+
         await new Promise(resolve => {
             copyFile(this.filePath, `${dirPath}/${name}.zip`, err => {
                 if (err) {
