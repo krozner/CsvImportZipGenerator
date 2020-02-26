@@ -1,0 +1,16 @@
+{
+    "dependencies": {
+        "@types/csvtojson": "^1.1.5",
+        "@types/node": "^13.7.6",
+        "@types/request": "^2.48.2",
+        "@types/uuid": "^3.4.5",
+        "archiver": "^3.1.1",
+        "csv-split-stream": "^1.0.2",
+        "csvtojson": "^2.0.10",
+        "reflect-metadata": "^0.1.13",
+        "request": "^2.88.0",
+        "ts-node": "^7.0.1",
+        "typescript": "^3.6.2",
+        "uuid": "^3.3.3"
+    }
+}
