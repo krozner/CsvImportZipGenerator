@@ -30,7 +30,7 @@ export class Zip extends Array<Images> {
             const imgDir = `${this.imgDirPath}/${images.sku}/${images.color}`;
             await this.mkdir(imgDir);
 
-            const copyDir = `${__dirname}/../var/Images/${images.sku}/${images.color}`;
+            const copyDir = `/var/www/app/var/Images/${images.sku}/${images.color}`;
 
             if (existsSync(`${copyDir}/${img.name}`)) {
                 img.setFilePath(copyDir);
