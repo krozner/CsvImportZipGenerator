@@ -1,5 +1,6 @@
 import * as uuidV4 from "uuid/v4";
-import { mkdir, createWriteStream, existsSync, copyFile } from "fs";
+import { mkdir, createWriteStream, existsSync, copyFile, chmod } from "fs";
+import * as chmodr from "chmodr";
 import * as archiver from "archiver";
 import { Images } from "./Images";
 
@@ -21,8 +22,16 @@ export class Zip extends Array<Images> {
 
     private async mkdir(dir: string): Promise<void> {
         await new Promise(resolve => {
-            mkdir(dir, {recursive: true}, () => {
-                resolve();
+            mkdir(dir, {recursive: true}, (err) => {
+                if (err) {
+                    console.log(err);
+                }
+                chmodr(dir, 0o777, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                    resolve();
+                });
             });
         });
     }
@@ -70,11 +79,18 @@ export class Zip extends Array<Images> {
         await this.mkdir(dirPath);
 
         await new Promise(resolve => {
-            copyFile(this.filePath, `${dirPath}/${name}.zip`, err => {
+            const dest = `${dirPath}/${name}.zip`;
+
+            copyFile(this.filePath, dest, err => {
                 if (err) {
                     console.log(err);
                 }
-                resolve();
+                chmod(dest, 0o777, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                    resolve();
+                });
             });
         });
     }
