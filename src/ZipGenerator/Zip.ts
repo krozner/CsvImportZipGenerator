@@ -43,15 +43,15 @@ export class Zip extends Array<Images> {
 
             const copyDir = `/var/www/app/var/Images/${images.sku}/${images.color}`;
 
-            if (existsSync(`${copyDir}/${img.name}`)) {
+            if (existsSync(`${copyDir}/${img.originName}`)) {
                 img.setFilePath(copyDir);
-                await img.copyTo(copyDir, imgDir, img.name);
+                await img.copyTo(copyDir, imgDir);
             } else {
                 await img.download();
 
-                await img.moveTo(imgDir, img.name);
+                await img.moveTo(imgDir);
                 await this.mkdir(copyDir);
-                await img.copyTo(imgDir, copyDir, img.name);
+                await img.copyTo(imgDir, copyDir);
             }
         }
     }

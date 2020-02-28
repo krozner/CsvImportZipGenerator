@@ -9,7 +9,7 @@ export const GenerateZip = async (filePath: string) => {
     let zip: Zip;
 
     try {
-        const utcString = new Date().toUTCString();
+        const utcString = new Date().toISOString();
 
         const splitter = new CsvFileSplitter(filePath, { lineLimit: 200 });
         await splitter.split();

@@ -1,6 +1,6 @@
 import * as request from "request";
 import * as uuidV4 from "uuid/v4";
-import { createWriteStream, rename, copyFile } from "fs";
+import { createWriteStream, rename, copyFile, existsSync, copyFileSync } from "fs";
 
 export class Image {
     private fileName: string;
@@ -11,9 +11,19 @@ export class Image {
         if (!Number.isInteger(index)) {
             throw new Error(`Image index not set`);
         }
+        extension = extension ? `.${extension}` : ".jpg";
+        return `${Number(index) + 1}${extension}`;
+    }
+
+    get originName() {
+        let { index, extension } = this;
+        if (!Number.isInteger(index)) {
+            throw new Error(`Image index not set`);
+        }
         extension = extension ? `.${extension}` : "";
         return `${Number(index) + 1}${extension}`;
     }
+
 
     private index: number;
 
@@ -36,8 +46,19 @@ export class Image {
     async download(): Promise<void> {
         const { url, filePath } = this;
 
+        const fileName = String(url).split("/").reduceRight(element => element);
+        const srcPath = `/var/www/app/var/img/${fileName}`;
+        if (existsSync(srcPath)) {
+            copyFileSync(srcPath, filePath);
+            return;
+        }
+
         await new Promise(resolve => {
             request.head(url, function(err, res, body) {
+                if (err) {
+                    console.log(err);
+                }
+
                 request(url)
                     .pipe(createWriteStream(filePath))
                     .on("close", () => {
@@ -60,11 +81,11 @@ export class Image {
         });
     }
 
-    async copyTo(srcDir: string, destDir: string, fileName: string): Promise<void> {
+    async copyTo(srcDir: string, destDir: string): Promise<void> {
         await new Promise(resolve => {
-            this.setFilePath(destDir, fileName);
+            this.setFilePath(destDir);
 
-            copyFile(`${srcDir}/${fileName}`, this.filePath, err => {
+            copyFile(`${srcDir}/${this.originName}`, this.filePath, err => {
                 if (err) {
                     console.log(err);
                 }
@@ -73,10 +94,10 @@ export class Image {
         });
     }
 
-    async moveTo(destDir: string, fileName: string): Promise<void> {
+    async moveTo(destDir: string): Promise<void> {
         await new Promise(resolve => {
-            rename(this.filePath, `${destDir}/${fileName}`, err => {
-                this.setFilePath(destDir, fileName);
+            rename(this.filePath, `${destDir}/${this.name}`, err => {
+                this.setFilePath(destDir);
 
                 if (err) {
                     console.log(err);

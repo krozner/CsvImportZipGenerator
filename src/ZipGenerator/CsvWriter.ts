@@ -2,17 +2,11 @@ import { renameSync } from "fs";
 import { Column, Document, DocumentColumns } from "Utils/FileWriter";
 import { Zip } from "./Zip";
 
-class LanguageColumn extends Column {
-    getter() {
-        return "en";
-    }
-}
-
 export class CsvWriter extends Document<any> {
     constructor() {
         super(
             new DocumentColumns(
-                new LanguageColumn("languageCode"),
+                new Column("languageCode", "languageCode"),
                 new Column("name", "name"),
                 new Column("description", "description"),
                 new Column("brandName", "brandName"),
