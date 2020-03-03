@@ -24,6 +24,9 @@ export class Image {
         return `${Number(index) + 1}${extension}`;
     }
 
+    get sourceName() {
+        return String(this.url).split("/").reduceRight(element => element);
+    }
 
     private index: number;
 
@@ -45,13 +48,6 @@ export class Image {
 
     async download(): Promise<void> {
         const { url, filePath } = this;
-
-        const fileName = String(url).split("/").reduceRight(element => element);
-        const srcPath = `/var/www/app/var/img/${fileName}`;
-        if (existsSync(srcPath)) {
-            copyFileSync(srcPath, filePath);
-            return;
-        }
 
         await new Promise(resolve => {
             request.head(url, function(err, res, body) {
@@ -81,17 +77,23 @@ export class Image {
         });
     }
 
-    async copyTo(srcDir: string, destDir: string): Promise<void> {
+    private async copy(src: string, desc: string): Promise<void> {
         await new Promise(resolve => {
-            this.setFilePath(destDir);
-
-            copyFile(`${srcDir}/${this.originName}`, this.filePath, err => {
+            copyFile(src, desc, err => {
                 if (err) {
                     console.log(err);
                 }
                 resolve();
             });
         });
+    }
+
+    async copyTo(filePath: string): Promise<void> {
+        await this.copy(this.filePath, filePath);
+    }
+
+    async copyFrom(filePath: string) {
+        await this.copy(filePath, this.filePath);
     }
 
     async moveTo(destDir: string): Promise<void> {

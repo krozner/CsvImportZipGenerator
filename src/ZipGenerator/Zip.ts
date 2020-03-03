@@ -1,5 +1,5 @@
 import * as uuidV4 from "uuid/v4";
-import { mkdir, createWriteStream, existsSync, copyFile, chmod } from "fs";
+import { mkdir, createWriteStream, existsSync, copyFile, chmod, copyFileSync } from "fs";
 import * as chmodr from "chmodr";
 import * as archiver from "archiver";
 import { Images } from "./Images";
@@ -38,21 +38,26 @@ export class Zip extends Array<Images> {
 
     async add(images: Images): Promise<void> {
         for (const img of images) {
-            const imgDir = `${this.imgDirPath}/${images.sku}/${images.color}`;
-            await this.mkdir(imgDir);
+            const downloadedDir = `/var/www/app/var/downloads/${images.sku}/${images.color}`,
+                downloadedFile  = `${downloadedDir}/${img.originName}`,
+                     sourceFile = `/var/www/app/var/img/${img.sourceName}`;
 
-            const copyDir = `/var/www/app/var/Images/${images.sku}/${images.color}`;
-
-            if (existsSync(`${copyDir}/${img.originName}`)) {
-                img.setFilePath(copyDir);
-                await img.copyTo(copyDir, imgDir);
-            } else {
+            if (existsSync(downloadedFile)) {
+                await img.copyFrom(downloadedFile);
+            }
+            else if (existsSync(sourceFile)) {
+                await img.copyFrom(sourceFile);
+            }
+            else{
                 await img.download();
 
-                await img.moveTo(imgDir);
-                await this.mkdir(copyDir);
-                await img.copyTo(imgDir, copyDir);
+                await this.mkdir(downloadedDir);
+                await img.copyTo(downloadedFile);
             }
+
+            const imgDir = `${this.imgDirPath}/${images.sku}/${images.color}`;
+            await this.mkdir(imgDir);
+            await img.moveTo(imgDir);
         }
     }
 
