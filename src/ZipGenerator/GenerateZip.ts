@@ -1,11 +1,9 @@
 import { Zip } from "./Zip";
-import { CsvWriter } from "./CsvWriter";
 import { CsvReader } from "./CsvReader";
 import { ImagesFactory } from "./ImagesFactory";
 import { CsvFileSplitter } from "./CsvFileSplitter";
 
 export const GenerateZip = async (filePath: string) => {
-    let doc: CsvWriter;
     let zip: Zip;
 
     try {
@@ -17,19 +15,17 @@ export const GenerateZip = async (filePath: string) => {
         for (const file of splitter) {
             const reader = new CsvReader(file.path);
 
-            doc = new CsvWriter();
             zip = new Zip();
 
             await reader.subscribe(async data => {
                 await zip.add(ImagesFactory.create(data));
-                doc.put(data);
+                zip.put(data);
 
                 process.stdout.write(".");
             });
 
             console.log(`\nSaving zip file...`);
 
-            await doc.save(zip); // moves document to zip folder
             await zip.save(); // archive folder
             await zip.moveTo(`/var/www/app/var/zip/${utcString}`, String(file.index)); // archive folder
 

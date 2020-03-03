@@ -3,6 +3,7 @@ import { mkdir, createWriteStream, existsSync, copyFile, chmod, copyFileSync } f
 import * as chmodr from "chmodr";
 import * as archiver from "archiver";
 import { Images } from "./Images";
+import { CsvWriter } from "./CsvWriter";
 
 export class Zip extends Array<Images> {
     private readonly dirName: string;
@@ -11,13 +12,17 @@ export class Zip extends Array<Images> {
     readonly dirPath: string;
     readonly imgDirPath: string;
 
+    readonly document: CsvWriter;
+
     constructor() {
         super();
 
         this.dirName = uuidV4();
         this.dirPath = `/tmp/${this.dirName}`;
         this.imgDirPath = `${this.dirPath}/Images`;
-        this.filePath = `${this.dirPath}.zip`
+        this.filePath = `${this.dirPath}.zip`;
+
+        this.document = new CsvWriter();
     }
 
     private async mkdir(dir: string): Promise<void> {
@@ -61,7 +66,13 @@ export class Zip extends Array<Images> {
         }
     }
 
+    put(data) {
+        this.document.put(data);
+    }
+
     async save(): Promise<void> {
+        await this.document.save(this); // moves document to zip folder
+
         await new Promise((resolve, reject) => {
             const output = createWriteStream(this.filePath);
             output.on("close", () => {
